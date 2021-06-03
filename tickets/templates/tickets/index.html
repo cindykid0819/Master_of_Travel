@@ -1,18 +1,53 @@
 {% extends 'base.html' %}
 
+
+
 {% block content %}
 
+
+    <div class="container">
+        <br />
+        <h1>旅遊小達人 Master of Travel </h1>
+        <br />
+    </div>
+
+    <!-- 搜尋欄 -->
     <form action="" method="Post">
         {% csrf_token %}
-        <div class="form-row">
-            <div class="form-group col-11">
+
+
+        <div class="row">
+            <div class="col-9">
                 <input class="form-control" name="city_name" placeholder="請輸入城市名稱">
             </div>
-            <div class="form-group col-1">
-                <input class="btn btn-dark" type="submit" value="查詢">
+            <div class="col-auto">
+                <input class="btn btn-outline-success" type="submit" value="查詢">
+            </div>
+            <div class="col-auto">
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                        排序
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><button class="dropdown-item" type="button">test</button></li>
+                        <li><a class="dropdown-item" href="#">價格</a></li>
+                        <li><a class="dropdown-item" href="#">評價</a></li>
+                        <li><a class="dropdown-item" href="#">使用期限</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    由低到高
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="#">由低到高</a></li>
+                    <li><a class="dropdown-item" href="#">由高到低</a></li>
+                </ul>
             </div>
         </div>
     </form>
+
     <table class="table table-hover">
         <thead>
             <tr>
@@ -24,7 +59,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for ticket in tickets %}
+            {% for ticket in tickets|dictsort:'price' %}
             <tr>
                 <td>
                     <a href="{{ ticket.link }}" target="_blank">{{ ticket.title }}</a>
@@ -32,7 +67,7 @@
                 <td>{{ ticket.price }}</td>
                 <td>{{ ticket.booking_date }}</td>
                 <td>{{ ticket.star }}</td>
-                <td><img src={{ ticket.source }} style="width:32px; heigh:32px;" /></td>
+                <td><img src={{ ticket.source }} style="width:32px; height:32px;" /></td>
             </tr>
             {% endfor %}
         </tbody>
