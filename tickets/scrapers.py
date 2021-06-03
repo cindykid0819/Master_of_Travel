@@ -82,9 +82,7 @@ class Kkday(Website):
         if self.city_name:  # 如果城市名稱非空值
 
             # 取得傳入城市的所有一日遊票券
-            response = requests.get("https://www.kkday.com/zh-tw/product/productlist/?city=A01-001-00001&cat=TAG_4_4&sort=pasc")
-                # =pasc 價格由低到高
-                #f"https://www.kkday.com/zh-tw/product/productlist/?city={loc_dict_kkday.get(self.city_name)}&cat=TAG_4_4&sort=pasc")
+            response = requests.get(f"https://www.kkday.com/zh-tw/product/productlist/?city={loc_dict_kkday.get(self.city_name)}&cat=TAG_4_4&sort=pasc")
 
             # 資料
             activities = response.json()["data"]
@@ -140,6 +138,7 @@ class Eztravel(Website):
 
                 for activity in activities:
 
+                    # 若出現MaxRetryError，可以把這裡的秒數增加後再嘗試
                     time.sleep(3)
 
                     # 票券名稱
