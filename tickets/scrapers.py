@@ -121,8 +121,8 @@ class Eztravel(Website):
         if self.city_name:  # 如果城市名稱非空值
 
             # 取得傳入城市的所有一日遊票券
-            loc_dict = {'基隆': "KEE", '台北': 'TPE', '桃園': 'TA1', '新竹': 'HSZ', '苗栗': 'MI1', '台中': 'TXG', '彰化': 'ZH1', '南投': 'NA0',
-             '雲林': 'YU1', '嘉義': 'CYI', '台南': 'TNN', '高雄': 'KHH', '屏東': 'PIF', '宜蘭': 'YI0', '花蓮': 'HUN', '台東': 'TTT', '澎湖': 'MZG'}
+            loc_dict = {'基隆': "KEE", '台北': 'TPE', '臺北': 'TPE', '桃園': 'TA1', '新竹': 'HSZ', '苗栗': 'MI1', '台中': 'TXG', '臺中': 'TXG', '彰化': 'ZH1', '南投': 'NA0',
+             '雲林': 'YU1', '嘉義': 'CYI', '台南': 'TNN', '臺南': 'TNN', '高雄': 'KHH', '屏東': 'PIF', '宜蘭': 'YI0', '花蓮': 'HUN', '台東': 'TTT', '臺東': 'TTT', '澎湖': 'MZG'}
 
             if loc_dict.get(self.city_name) != "None":
 
@@ -139,7 +139,7 @@ class Eztravel(Website):
                 for activity in activities:
 
                     # 若出現MaxRetryError，可以把這裡的秒數增加後再嘗試
-                    time.sleep(3)
+                    time.sleep(0.5)
 
                     # 票券名稱
                     title = activity.find("h4", {"class": "tkt-title"}).getText().strip()
@@ -156,5 +156,5 @@ class Eztravel(Website):
                     result.append(dict(title=title, link=link, price=price, source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
                     
 
-                driver.quit()
+                #driver.quit()  去掉就不會有MaxRetryError
             return result
