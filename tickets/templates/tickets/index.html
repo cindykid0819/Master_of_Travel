@@ -3,73 +3,126 @@
 
 
 {% block content %}
+    
+    <!-- Javascript -->
+    <script>
+        function SubmitPriceOrder() {
+            document.getElementById("priceOrder").submit();
+        }
 
+        function SubmitEvaluationOrder() {
+            document.getElementById("evaluationOrder").submit();
+        }
 
-    <div class="container">
-        <br />
-        <h1>旅遊小達人 Master of Travel </h1>
-        <br />
-    </div>
+        function SubmitPosOrder() {
+            document.getElementById("posOrder").submit();
+        }
 
-    <!-- 搜尋欄 -->
-    <form action="" method="Post">
-        {% csrf_token %}
+        function SubmitNegOrder() {
+            document.getElementById("negOrder").submit();
+        }
 
+    </script>
 
-        <div class="row">
-            <div class="col-9">
-                <input class="form-control" name="city_name" placeholder="請輸入城市名稱">
-            </div>
-            <div class="col-auto">
-                <input class="btn btn-outline-success" type="submit" value="查詢">
-            </div>
-            <div class="col-auto">
-                <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                        排序
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><button class="dropdown-item" type="button">test</button></li>
-                        <li><a class="dropdown-item" href="#">價格</a></li>
-                        <li><a class="dropdown-item" href="#">評價</a></li>
-                        <li><a class="dropdown-item" href="#">使用期限</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    由低到高
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="#">由低到高</a></li>
-                    <li><a class="dropdown-item" href="#">由高到低</a></li>
-                </ul>
+    
+    <div class="row align-items-center">
+        <div class="col-8">
+            <div class="container">
+                <br />
+                <h1>旅遊小達人</h1>
+                <h1>Master of Travel</h1>
+                <br />         
             </div>
         </div>
-    </form>
+
+        <div class="col-4">
+            <!-- 搜尋欄 -->
+            <form action="" method="post" id="scrapeForm">
+                <!-- 防範跨站攻擊 安全目的-->
+                {% csrf_token %}
+                <div class="row align-items-center">
+
+                </div>
+                <br />
+                <h6 class="text-start">排序標準：</h6>
+                <div class="d-grid">
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check" name="sort_condition" id="priceOrder" value="價格" onclick="SubmitPriceOrder()" autocomplete="off">
+                        <label class="btn btn-outline-success" for="priceOrder">價格</label>
+
+                        <input type="radio" class="btn-check" name="sort_condition" id="evaluationOrder" value="評價" onclick="SubmitEvalutionOrder()" autocomplete="off">
+                        <label class="btn btn-outline-success" for="evaluationOrder">評價</label>
+                    </div>
+                </div>
+                <br />
+                <h6 class="text-start">順序：</h6>
+                <div class="d-grid">
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check" name="sort_order" id="posOrder" value="▲" onclick="SubmitPosOrder()" autocomplete="off">
+                        <label class="btn btn-outline-success" for="posOrder">▲</label>
+
+                        <input type="radio" class="btn-check" name="sort_order" id="negOrder" value="▼" onclick="SubmitNegOrder()" autocomplete="off">
+                        <label class="btn btn-outline-success" for="negOrder">▼</label>
+                    </div>
+                </div>
+                <br />
+                <h6 class="text-start">價格搜尋範圍：</h6>
+
+                <br />
+                <div class="row align-items-center">
+                    <div class="col-9">
+                        <input class="form-control float-start" id="search" name="city_name" placeholder="請輸入城市名稱">
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-outline-success float-end" type="submit">查詢</button>
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+        
 
     <table class="table table-hover">
         <thead>
             <tr>
                 <th>票券名稱</th>
                 <th>價格</th>
-                <th>最早可使用日期</th>
                 <th>評價</th>
                 <th>來源網站</th>
             </tr>
         </thead>
-        <tbody>
-            {% for ticket in tickets|dictsort:'price' %}
-            <tr>
-                <td>
-                    <a href="{{ ticket.link }}" target="_blank">{{ ticket.title }}</a>
-                </td>
-                <td>{{ ticket.price }}</td>
-                <td>{{ ticket.booking_date }}</td>
-                <td>{{ ticket.star }}</td>
-                <td><img src={{ ticket.source }} style="width:32px; height:32px;" /></td>
-            </tr>
-            {% endfor %}
+        <tbody id="scrapeResult">
+            <!-- 正序 -->
+            {% if order == 1 %}
+                {% for ticket in tickets|dictsort:sortKey %}
+                <tr>
+                    <td>
+                        <a href="{{ ticket.link }}" target="_blank">{{ ticket.title }}</a>
+                    </td>
+                    <td>{{ ticket.price }}</td>
+                    <td>{{ ticket.star }}</td>
+                    <td><img src={{ ticket.source }} style="width:32px; height:32px;" /></td>
+                </tr>
+                {% endfor %}
+            <!-- 反序 -->
+            {% else %}
+                {% for ticket in tickets|dictsortreversed:sortKey %}
+                <tr>
+                    <td>
+                        <a href="{{ ticket.link }}" target="_blank">{{ ticket.title }}</a>
+                    </td>
+                    <td>{{ ticket.price }}</td>
+                    <td>{{ ticket.star }}</td>
+                    <td><img src={{ ticket.source }} style="width:32px; height:32px;" /></td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+            
+
+
+
         </tbody>
     </table>
 
