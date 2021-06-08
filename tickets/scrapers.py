@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime
+import re
 
-
+# Eztravel用
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
@@ -14,13 +15,35 @@ driver = webdriver.Chrome(options=my_options)# 不開啟實體瀏覽器
 
 # 票券網站抽象類別
 class Website(ABC):
-
     def __init__(self, city_name):
-        self.city_name = city_name  # 城市名稱屬性
+        self.city_name = city_name # 城市名稱屬性
+
 
     @abstractmethod
     def scrape(self):  # 爬取票券抽象方法
         pass
+
+# 排序方式
+class Arrangement():
+    def __init__(self, sort_order, sort_condition):    
+        self.sort_order = sort_order # 資料顯示排序
+        self.sort_condition = sort_condition # 資料顯示排序指標
+
+    def sortOrder(self):
+        if self.sort_order == "▼":
+            return 1
+        elif self.sort_order == "▲":
+            return -1
+        else:
+            return 1
+
+    def sortCondition(self):
+        if self.sort_condition == "價格":
+            return "price_value"
+        elif self.sort_condition == "評價":
+            return "star_value"
+        else:
+            return "price_value"
 
 
 # KLOOK客路網站
@@ -30,13 +53,11 @@ class Klook(Website):
     def city_id(self):
         city_id = {"台北":"19","新北":"6488","桃園":"4737","新竹":"27456","台中":"25","嘉義":"436", \
                    "南投":"25303","台南":"164","高雄":"22","屏東":"23","台東":"47","花蓮":"20","宜蘭":"42", \
-                  "澎湖":"43","金門、馬祖":"165"}
-        
+                  "澎湖":"43","金門、馬祖":"165"}        
         
         return city_id[self.city_name]
         
-    def scrape(self):
-        
+    def scrape(self):       
  
         result = []  # 回傳結果
         
@@ -65,6 +86,8 @@ class Klook(Website):
                 
                 # 票券價格
                 price = activity.find("span", {"class": "latest_price"}).text.strip()
+                # 將文字及標號過濾以排序
+                price_value = int(re.sub("\D","",price))
                 
                 # 最早可使用日期
                 booking_date = activity.find("span", {"class": "g_right j_card_date"}).get("data-serverdate")
@@ -72,15 +95,17 @@ class Klook(Website):
                 # 評價
                 if activity.find("span", {"class": "t14 star_score"}):
                     star = activity.find("span", {"class": "t14 star_score"}).text
-                    
+                    # 將文字及標號過濾以排序
+                    star_value = int(re.sub("\D","",star))
                 else :
-                    star ="無"
-                    
+                    star = "無"
+                    star_value = 0
  
                 result.append(
-                    dict(title=title, link=link, price=price, booking_date=booking_date, star=star, source="https://cdn.klook.com/s/dist_web/assert/desktop/imgs/favicon-098cf2db20.png"))
+                    dict(title=title, link=link, price=price, price_value=price_value, booking_date=booking_date, star=star, star_value=star_value, source="https://cdn.klook.com/s/dist_web/assert/desktop/imgs/favicon-098cf2db20.png"))
  
         return result
+
 
 
 # KKday網站
@@ -95,7 +120,9 @@ class Kkday(Website):
         if self.city_name:  # 如果城市名稱非空值
 
             # 取得傳入城市的所有一日遊票券
-            response = requests.get(f"https://www.kkday.com/zh-tw/product/productlist/?city={loc_dict_kkday.get(self.city_name)}&cat=TAG_4_4&sort=pasc")
+            response = requests.get("https://www.kkday.com/zh-tw/product/productlist/?city=A01-001-00001&cat=TAG_4_4&sort=pasc")
+                # =pasc 價格由低到高
+                #f"https://www.kkday.com/zh-tw/product/productlist/?city={loc_dict_kkday.get(self.city_name)}&cat=TAG_4_4&sort=pasc")
 
             # 資料
             activities = response.json()["data"]
@@ -134,15 +161,14 @@ class Eztravel(Website):
         if self.city_name:  # 如果城市名稱非空值
 
             # 取得傳入城市的所有一日遊票券
-            loc_dict = {'基隆': "KEE", '台北': 'TPE', '臺北': 'TPE', '桃園': 'TA1', '新竹': 'HSZ', '苗栗': 'MI1', '台中': 'TXG', '臺中': 'TXG', '彰化': 'ZH1', '南投': 'NA0',
-             '雲林': 'YU1', '嘉義': 'CYI', '台南': 'TNN', '臺南': 'TNN', '高雄': 'KHH', '屏東': 'PIF', '宜蘭': 'YI0', '花蓮': 'HUN', '台東': 'TTT', '臺東': 'TTT', '澎湖': 'MZG'}
+            loc_dict = {'基隆': "KEE", '台北': 'TPE', '桃園': 'TA1', '新竹': 'HSZ', '苗栗': 'MI1', '台中': 'TXG', '彰化': 'ZH1', '南投': 'NA0',
+             '雲林': 'YU1', '嘉義': 'CYI', '台南': 'TNN', '高雄': 'KHH', '屏東': 'PIF', '宜蘭': 'YI0', '花蓮': 'HUN', '台東': 'TTT', '澎湖': 'MZG'}
 
             if loc_dict.get(self.city_name) != "None":
 
                 loc = loc_dict.get(self.city_name)
                 url = "https://activity.eztravel.com.tw/taiwan/results/" + loc + "/N5?keywords="
                 driver.get(url)
-                #time.sleep(5)
                 response = driver.page_source
                 soup =  BeautifulSoup(response, "lxml")
 
@@ -151,7 +177,6 @@ class Eztravel(Website):
 
                 for activity in activities:
 
-                    # 若出現MaxRetryError，可以把這裡的秒數增加後再嘗試
                     time.sleep(0.5)
 
                     # 票券名稱
@@ -162,12 +187,15 @@ class Eztravel(Website):
  
                     # 票券價格
                     price = activity.find("span", {"data-bind": "text: product.formattedMinSitePrice()"}).getText().strip()
-                    price = price.replace(',', "")
-                    price = int(price)
+                    # 將文字及標號過濾以排序
+                    price_value = int(re.sub("\D","",price))
 
-                    # result.append(dict(title=title, link=link, price=price, source="Eztravel"))
-                    result.append(dict(title=title, link=link, price=price, source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
-                    
+                    # 評價
+                    star = "無"
+                    star_value = 0
 
-                #driver.quit()  去掉就不會有MaxRetryError
+                    result.append(dict(title=title, link=link, price=price, price_value=price_value, star=star, star_value=star_value,source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
+                 
+
+                #driver.quit()
             return result

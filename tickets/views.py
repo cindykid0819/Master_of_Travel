@@ -1,17 +1,14 @@
 from django.shortcuts import render
-#from .scrapers import Klook, Kkday
-from .scrapers import Kkday, Eztravel
+from .scrapers import Arrangement, Kkday, Eztravel, Klook
 
 def index(request):
-
-    #klook = Klook(request.POST.get("city_name"))
+    arrangement = Arrangement(request.POST.get("sort_order"), request.POST.get("sort_condition"))
+    klook = Klook(request.POST.get("city_name"))
     #kkday = Kkday(request.POST.get("city_name"))
     eztravel = Eztravel(request.POST.get("city_name"))
 
     context = {
-        #"tickets": kkday.scrape()
-        #"tickets": klook.scrape() + kkday.scrape()
-        "tickets": eztravel.scrape()
+        "tickets": klook.scrape() + eztravel.scrape(), "sortKey": arrangement.sortCondition(), "order": arrangement.sortOrder()
     }
 
     return render(request, "tickets/index.html", context)
