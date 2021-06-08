@@ -7,8 +7,8 @@ tickets
 >>tickets  
 >>>→index.html 
  
->→scarpers  
-→views 
+>→scarpers.py  
+→views.py 
 
 
 目前進度：
