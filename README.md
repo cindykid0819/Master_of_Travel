@@ -1,7 +1,5 @@
+2021-06-08
 更改以下檔案：
-
-templates  
->→base.html  
 
 tickets  
 >templates  
@@ -10,5 +8,3 @@ tickets
  
 >→scarpers  
 →views  
-  
-新增chromedriver.exe
