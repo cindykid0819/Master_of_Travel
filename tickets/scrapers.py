@@ -25,9 +25,11 @@ class Website(ABC):
 
 # 排序方式
 class Arrangement():
-    def __init__(self, sort_order, sort_condition):    
+    def __init__(self, sort_order, sort_condition, lower_limit, upper_limit):    
         self.sort_order = sort_order # 資料顯示排序
         self.sort_condition = sort_condition # 資料顯示排序指標
+        self.lower_limit = lower_limit # 搜尋範圍下限
+        self.upper_limit = upper_limit # 搜尋範圍上限
 
     def sortOrder(self):
         if self.sort_order == "▼":
@@ -44,6 +46,12 @@ class Arrangement():
             return "star_value"
         else:
             return "price_value"
+
+    def lowerLimit(self):
+        return int(self.lower_limit)
+    
+    def upperLimit(self):
+        return int(self.upper_limit)
 
 
 # KLOOK客路網站
@@ -66,8 +74,6 @@ class Klook(Website):
             # 取得傳入城市的所有一日遊票券
             
             response = requests.get(f"https://www.klook.com/zh-TW/search/?query=一日遊&city_id={self.city_id()}&start=1")
-            
-            
             soup = BeautifulSoup(response.text, "lxml")
             
             
