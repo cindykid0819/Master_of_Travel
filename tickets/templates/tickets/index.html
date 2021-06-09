@@ -27,22 +27,26 @@
     
     <div class="row align-items-center">
         <div class="col-8">
-            <div class="container">
+            <div class="p-3 bg-success text-white rounded-3">
+                <br />
+                <br />
+                <br />
                 <br />
                 <h1>旅遊小達人</h1>
                 <h1>Master of Travel</h1>
-                <br />         
+                <br />
+                <br />
+                <br />
+                <br />
             </div>
         </div>
 
         <div class="col-4">
+            
             <!-- 搜尋欄 -->
-            <form action="" method="post" id="scrapeForm">
+            <form action="" method="post">
                 <!-- 防範跨站攻擊 安全目的-->
                 {% csrf_token %}
-                <div class="row align-items-center">
-
-                </div>
                 <br />
                 <h6 class="text-start">排序標準：</h6>
                 <div class="d-grid">
@@ -90,8 +94,7 @@
                         <button class="btn btn-outline-success float-end" type="submit">查詢</button>
                     </div>
                 </div>
-
-
+                <br />
             </form>
         </div>
     </div>
