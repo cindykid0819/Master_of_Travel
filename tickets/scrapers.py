@@ -15,9 +15,16 @@ driver = webdriver.Chrome(options=my_options)# 不開啟實體瀏覽器
 
 # 票券網站抽象類別
 class Website(ABC):
-    def __init__(self, city_name):
+    def __init__(self, city_name, lower_limit, upper_limit):
         self.city_name = city_name # 城市名稱屬性
-
+        if lower_limit != '':
+            self.lower_limit = lower_limit
+        else:
+            self.lower_limit = '0'
+        if upper_limit != '':
+            self.upper_limit = upper_limit
+        else:
+            self.upper_limit = '100000'
 
     @abstractmethod
     def scrape(self):  # 爬取票券抽象方法
@@ -25,11 +32,9 @@ class Website(ABC):
 
 # 排序方式
 class Arrangement():
-    def __init__(self, sort_order, sort_condition, lower_limit, upper_limit):    
+    def __init__(self, sort_order, sort_condition):    
         self.sort_order = sort_order # 資料顯示排序
         self.sort_condition = sort_condition # 資料顯示排序指標
-        self.lower_limit = lower_limit # 搜尋範圍下限
-        self.upper_limit = upper_limit # 搜尋範圍上限
 
     def sortOrder(self):
         if self.sort_order == "▼":
@@ -46,12 +51,6 @@ class Arrangement():
             return "star_value"
         else:
             return "price_value"
-
-    def lowerLimit(self):
-        return int(self.lower_limit)
-    
-    def upperLimit(self):
-        return int(self.upper_limit)
 
 
 # KLOOK客路網站
@@ -106,9 +105,10 @@ class Klook(Website):
                 else :
                     star = "無"
                     star_value = 0
- 
-                result.append(
-                    dict(title=title, link=link, price=price, price_value=price_value, booking_date=booking_date, star=star, star_value=star_value, source="https://cdn.klook.com/s/dist_web/assert/desktop/imgs/favicon-098cf2db20.png"))
+
+                if ((price_value >= int(self.lower_limit)) and (price_value <= int(self.upper_limit))):
+                	result.append(
+                    	dict(title=title, link=link, price=price, price_value=price_value, booking_date=booking_date, star=star, star_value=star_value, source="https://cdn.klook.com/s/dist_web/assert/desktop/imgs/favicon-098cf2db20.png"))
  
         return result
 
@@ -152,8 +152,8 @@ class Kkday(Website):
                 star = str(activity["rating_star"])[
                     0:3] if activity["rating_star"] else "無"
 
-                result.append(
-                    dict(title=title, link=link, price=price, booking_date=booking_date, star=star, source="https://cdn.kkday.com/m-web/assets/img/favicon.png"))
+                if ((price_value >= int(self.lower_limit)) and (price_value <= int(self.upper_limit))):
+                    	dict(title=title, link=link, price=price, booking_date=booking_date, star=star, source="https://cdn.kkday.com/m-web/assets/img/favicon.png")
 
         return result
 
@@ -200,7 +200,8 @@ class Eztravel(Website):
                     star = "無"
                     star_value = 0
 
-                    result.append(dict(title=title, link=link, price=price, price_value=price_value, star=star, star_value=star_value,source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
+                    if ((price_value >= int(self.lower_limit)) and (price_value <= int(self.upper_limit))):
+                    	result.append(dict(title=title, link=link, price=price, price_value=price_value, star=star, star_value=star_value,source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
                  
 
                 #driver.quit()
