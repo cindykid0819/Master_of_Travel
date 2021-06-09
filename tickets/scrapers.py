@@ -116,44 +116,63 @@ class Klook(Website):
 
 # KKday網站
 class Kkday(Website):
+    
+    def city_id(self):
+        city_id = {"台北":"00001","新北":"00006","桃園":"00008","新竹":"00009","台中":"00002","嘉義":"00014", \
+                   "南投":"00012","台南":"00003","高雄":"00004","屏東":"00015","台東":"00018","花蓮":"00005","宜蘭":"00017", \
+                  "澎湖":"00019","金門":"00020","苗栗":"00010","基隆":"00026","墾丁":"00016","雲林":"00013","小琉球":"00024"}
+        
+        
+        return city_id[self.city_name]
 
     def scrape(self):
 
         result = []  # 回傳結果
 
-        loc_dict_kkday = {'台北': 'A01-001-00001'}
-
         if self.city_name:  # 如果城市名稱非空值
 
             # 取得傳入城市的所有一日遊票券
-            response = requests.get("https://www.kkday.com/zh-tw/product/productlist/?city=A01-001-00001&cat=TAG_4_4&sort=pasc")
-                # =pasc 價格由低到高
-                #f"https://www.kkday.com/zh-tw/product/productlist/?city={loc_dict_kkday.get(self.city_name)}&cat=TAG_4_4&sort=pasc")
-
+            driver.get(
+                f"https://www.kkday.com/zh-tw/product/productlist/?page=1&city=A01-001-{self.city_id()}&cat=TAG_4_4&sort=rdesc")
+            time.sleep(2)
+            response = driver.page_source
+            soup = BeautifulSoup(response, "lxml")
+            
             # 資料
-            activities = response.json()["data"]
-
+            activities = soup.find_all("div", {"class" : "product-listview search-info"})
+            
             for activity in activities:
 
                 # 票券名稱
-                title = activity["name"]
+                title = activity.find("span",{"class" : "product-listview__name"}).text.strip()
 
                 # 票券詳細內容連結
-                link = activity["url"]
-
+                link = activity.find("a").get("href")
+                
                 # 票券價格
-                price = f'NT$ {int(activity["price"]):,}'
-
-                # 最早可使用日期
-                booking_date = datetime.strftime(datetime.strptime(
-                    activity["earliest_sale_date"], "%Y%m%d"), "%Y-%m-%d")
-
-                # 評價
-                star = str(activity["rating_star"])[
-                    0:3] if activity["rating_star"] else "無"
-
-                if ((price_value >= int(self.lower_limit)) and (price_value <= int(self.upper_limit))):
-                    	dict(title=title, link=link, price=price, booking_date=booking_date, star=star, source="https://cdn.kkday.com/m-web/assets/img/favicon.png")
+                price = activity.find("h4",{"class" : "text-primary"}).text.strip()
+                price_value = int(re.sub("\D","",price))
+                
+                #最早可使用日期
+                booking_date = activity.find("div",{"class" : "product-time-icon"}).text.strip()
+                try:
+                    booking_date = booking_date[booking_date.index("2"):]
+                except:
+                    booking_date = "明天"
+                # 評價(用到雙層爬蟲)
+                driver.get(link)
+                time.sleep(1)
+                re = driver.page_source
+                soup_re = BeautifulSoup(re,"lxml")
+                try:
+                    star = soup_re.find("b",{"class":"text-primary"}).string.strip()
+                    star_value = int(re.sub("\D","",star))
+                except:
+                    star = "無"
+                    star_value = 0
+                    
+                result.append(
+                    dict(title=title, link=link, price=price,star = star,booking_date =booking_date, source="https://cdn.kkday.com/m-web/assets/img/favicon.png"))
 
         return result
 
