@@ -73,8 +73,8 @@ class Klook(Website):
  
             # 取得傳入城市的所有一日遊票券
             
-            response1 = requests.get(f"https://www.klook.com/zh-TW/search/?query=一日遊&city_id={self.city_id()}&start=1")
-            soup = BeautifulSoup(response1.text, "lxml")
+            response = requests.get(f"https://www.klook.com/zh-TW/search/?query=一日遊&city_id={self.city_id()}&start=1")
+            soup = BeautifulSoup(response.text, "lxml")
             
             
             # 取得票券卡片(Card)元素
@@ -134,9 +134,9 @@ class Kkday(Website):
             # 取得傳入城市的所有一日遊票券
             driver.get(
                 f"https://www.kkday.com/zh-tw/product/productlist/?page=1&city=A01-001-{self.city_id()}&cat=TAG_4_4&sort=rdesc")
-            time.sleep(0.5)
-            response2 = driver.page_source
-            soup = BeautifulSoup(response2, "lxml")
+            time.sleep(0.2)
+            response = driver.page_source
+            soup = BeautifulSoup(response, "lxml")
             
             # 資料
             activities = soup.find_all("div", {"class" : "product-listview search-info"})
@@ -163,9 +163,9 @@ class Kkday(Website):
 
                 # 評價(用到雙層爬蟲)
                 driver.get(link)
-                time.sleep(0.5)
-                response3 = driver.page_source
-                soup_re = BeautifulSoup(response3,"lxml")
+                time.sleep(0.2)
+                response2 = driver.page_source
+                soup_re = BeautifulSoup(response2,"lxml")
                 try:
                     star = soup_re.find("b",{"class":"text-primary"}).string.strip()
                     star_value = int(re.sub("\D","",star))
@@ -198,8 +198,8 @@ class Eztravel(Website):
                 loc = loc_dict.get(self.city_name)
                 url = "https://activity.eztravel.com.tw/taiwan/results/" + loc + "/N5?keywords="
                 driver.get(url)
-                response4 = driver.page_source
-                soup =  BeautifulSoup(response4, "lxml")
+                response = driver.page_source
+                soup = BeautifulSoup(response, "lxml")
 
                 activities = soup.find_all("div", {"class" : "goods-class clearfix w308"})
 
@@ -229,4 +229,4 @@ class Eztravel(Website):
                             dict(title=title, link=link, price=price, price_value=price_value, star=star, star_value=star_value, source="https://static.cdn-eztravel.com/assets/images/common/logo.jpg"))
                  
                 #driver.quit()
-            return result
+        return result

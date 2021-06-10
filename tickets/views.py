@@ -9,8 +9,7 @@ def index(request):
     eztravel = Eztravel(request.POST.get("city_name"), request.POST.get("lower_limit"), request.POST.get("upper_limit"))
 
     context = {
-        #"tickets": klook.scrape() + kkday.scrape(), "sortKey": arrangement.sortCondition(), "order": arrangement.sortOrder()
-        "tickets": klook.scrape() + kkday.scrape() + eztravel.scrape(), "sortKey": arrangement.sortCondition(), "order": arrangement.sortOrder()
+        "tickets": eztravel.scrape() + klook.scrape() + kkday.scrape(), "sortKey": arrangement.sortCondition(), "order": arrangement.sortOrder()
     }
 
     return render(request, "tickets/index.html", context)
