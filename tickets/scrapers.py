@@ -25,7 +25,7 @@ class Website(ABC):
         if upper_limit != '': # 搜尋範圍上限
             self.upper_limit = upper_limit
         else:
-            self.upper_limit = "100000"
+            self.upper_limit = "10000"
 
 
     @abstractmethod
